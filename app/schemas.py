@@ -43,6 +43,7 @@ class Place(PlaceBase):
 class PlaceResponse(PlaceBase):
     Place_id: int
     Created_at: datetime
+    Location_name: str
 
 
 ########################################### USER ###########################################
