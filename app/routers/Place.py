@@ -83,7 +83,7 @@ def getPlaces(id: int, user: int=Depends(oauth2.getCurrentUser)):
 
 ### Add a Place
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def addPlace(new_place: schemas.Place, Location: int, user: int=Depends(oauth2.getCurrentUser)):
+def addPlace(new_place: schemas.NewPlace, Location: int, user: int=Depends(oauth2.getCurrentUser)):
     try:
         cursor.execute("""INSERT INTO PLACE (Named)
                           VALUES (%s)""", (new_place.Named,))
@@ -128,7 +128,7 @@ def removePlace(id: int, user: int=Depends(oauth2.getCurrentUser)):
 
 ### Update a Place
 @router.put("/{id}")
-def changePlaceName(id: int, place: schemas.Place, user: int=Depends(oauth2.getCurrentUser)):
+def changePlaceName(id: int, place: schemas.NewPlace, user: int=Depends(oauth2.getCurrentUser)):
     try:
         cursor.execute("""UPDATE PLACE SET Named = %s WHERE Place_id = %s""", (place.Named, id))
         cnx.commit()
