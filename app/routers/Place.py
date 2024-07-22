@@ -4,7 +4,6 @@ from mysql.connector import errorcode
 from .. import schemas, oauth2
 from typing import List, Optional
 from ..database import cursor, cnx
-from . import Location
 
 router = APIRouter(
     prefix="/places",
