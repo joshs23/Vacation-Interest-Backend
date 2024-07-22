@@ -37,7 +37,7 @@ class LocationResponse(LocationBase):
 class PlaceBase(BaseModel):
     Named: str
 
-class Place(PlaceBase):
+class NewPlace(PlaceBase):
     pass
 
 class PlaceResponse(PlaceBase):
@@ -153,6 +153,8 @@ class FeatureCreate(FeatureBase):
 class FeatureResponse(FeatureBase):
     pass
     Created_at: datetime
+    Place: str
+    Location: str
 
 # CREATE TABLE FEATURES_AT_PLACE(
 # 	Feature_id INT UNSIGNED NOT NULL,
