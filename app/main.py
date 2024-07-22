@@ -3,7 +3,7 @@
 from fastapi import Body, FastAPI
 from . import models
 from .database import engine
-from .routers import Group, Location, Place, User, Auth
+from .routers import Group, Location, Place, User, Auth, Feature
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -14,3 +14,4 @@ app.include_router(Place.router)
 app.include_router(User.router)
 app.include_router(Auth.router)
 app.include_router(Group.router)
+app.include_router(Feature.router)
