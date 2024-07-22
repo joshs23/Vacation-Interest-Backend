@@ -16,9 +16,8 @@ def addUser(User_id: int, Group_id: int):
     try:
         cursor.execute("""INSERT INTO USERS_IN_GROUP (User_id, Group_id) 
                         VALUES (%s, %s)""", (User_id, Group_id))
-        cnx.commit()
     except mysql.connector.Error as err:
-        cnx.rollback()
+
         if err.errno == errorcode.ER_DUP_ENTRY:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="User already in group")
@@ -103,7 +102,6 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
     try:
         cursor.execute("""INSERT INTO USER_GROUP (Group_name, Owner_id, Public_group)
                        values (%s, %s, %s)""", (new_group.Group_name, current_user.User_id, new_group.Public_group))
-        cnx.commit
 
         # Check to see if the group was added
         cursor.execute("""SELECT USER_GROUP.*,
@@ -114,22 +112,17 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
                           LEFT JOIN `USER` ON USER_GROUP.Owner_id = `USER`.User_id
                           WHERE Group_name = %s""", (new_group.Group_name, ))
         added_group = cursor.fetchone()
+        Group_id=added_group[0]
+        addUser(current_user.User_id, Group_id)
+        cnx.commit()
     except mysql.connector.Error as err:
-        cnx.rollback
+        cnx.rollback()
         if err.errno == errorcode.ER_DUP_ENTRY:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail=f"{new_group.Group_name} already exists")
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Internal server error occurred.")
-        
-    try:
-        Group_id=added_group[0]
-        addUser(current_user.User_id, Group_id)
-    except mysql.connector.Error as err:
-        cnx.rollback
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail="Could not create group")
         
     return schemas.GroupResponse(
         Group_id=added_group[0],
