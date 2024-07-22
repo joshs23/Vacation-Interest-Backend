@@ -22,7 +22,7 @@ def getLocations(db: Session = Depends(get_db), user: int=Depends(oauth2.getCurr
 
 ### Get a Location by id
 @router.get("/{id}", response_model=schemas.LocationResponse)
-def getLocations(id: int, db: Session = Depends(get_db), user: int=Depends(oauth2.getCurrentUser)):
+def getLocation(id: int, db: Session = Depends(get_db), user: int=Depends(oauth2.getCurrentUser)):
     location = db.query(models.Location).filter(models.Location.Location_id == id).first()
     if not location:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
