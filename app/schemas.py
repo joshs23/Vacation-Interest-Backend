@@ -135,15 +135,24 @@ class Users_In_GroupBase(BaseModel):
 # 	Feature_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
 # 	Named VARCHAR(50) NOT NULL UNIQUE,
 # 	Description TEXT NOT NULL,
-# 	Time_start TIME,
-# 	Time_end TIME,
-# 	Days_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
-# 	Specific_date DATE,
 # 	Added_by INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (Feature_id),
 # 	FOREIGN KEY (Added_by) REFERENCES USERS(User_id)
 # );
+
+class FeatureBase(BaseModel):
+    Feature_id: int
+    Named: str
+    Description: str
+    Added_by: int
+
+class FeatureCreate(FeatureBase):
+    pass
+    
+class FeatureResponse(FeatureBase):
+    pass
+    Created_at: datetime
 
 # CREATE TABLE FEATURES_AT_PLACE(
 # 	Feature_id INT UNSIGNED NOT NULL,
