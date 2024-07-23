@@ -145,7 +145,6 @@ class FeatureBase(BaseModel):
     Feature_id: int
     Named: str
     Description: str
-    Added_by: int
 
 class FeatureCreate(FeatureBase):
     pass
@@ -153,6 +152,7 @@ class FeatureCreate(FeatureBase):
 class FeatureResponse(FeatureBase):
     pass
     Created_at: datetime
+    Added_by: str
     Place: str
     Location: str
 
