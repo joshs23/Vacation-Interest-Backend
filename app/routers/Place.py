@@ -4,6 +4,7 @@ from mysql.connector import errorcode
 from .. import schemas, oauth2
 from typing import List, Optional
 from ..database import cursor, cnx
+from . import Location
 
 router = APIRouter(
     prefix="/places",
@@ -23,7 +24,8 @@ def addPlaceToLocation(Place_id: int, Location_id: int):
     try:
         cursor.execute("""INSERT INTO PLACES_AT_LOCATION (Place_id, Location_id) 
                       VALUES (%s, %s)""", (Place_id, Location_id))
-        return getLocationName(Place_id)
+        location = Location.getLocation(id = Location_id)
+        return location.Named
 
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_DUP_ENTRY:
@@ -33,13 +35,6 @@ def addPlaceToLocation(Place_id: int, Location_id: int):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Internal server error occurred while adding Place to Location")
     
-def getLocationName(Place_id: int):
-    cursor.execute("""SELECT * FROM PLACES_AT_LOCATION WHERE Place_id = %s""", (Place_id,))
-    location = cursor.fetchone
-    if not location:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Place with id: {id} was not found")
-    return location[1]
         
 
 ############################################################ PLACE ############################################################
