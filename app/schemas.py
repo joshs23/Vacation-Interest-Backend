@@ -146,7 +146,7 @@ class FeatureBase(BaseModel):
     Named: str
     Description: str
 
-class FeatureCreate(FeatureBase):
+class NewFeature(FeatureBase):
     pass
     
 class FeatureResponse(FeatureBase):
