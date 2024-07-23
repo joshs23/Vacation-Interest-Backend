@@ -66,7 +66,7 @@ def getPlaces(user: int=Depends(oauth2.getCurrentUser), limit:int = 10, skip:int
     return place_responses
 
 @router.get("/{id}", response_model=schemas.PlaceResponse)
-def getPlaces(id: int, user: int=Depends(oauth2.getCurrentUser)):
+def getPlace(id: int, user: int=Depends(oauth2.getCurrentUser)):
     cursor.execute("""SELECT PLACE.*,
                              LOCATION.Named
                       FROM PLACE
