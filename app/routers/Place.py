@@ -52,8 +52,11 @@ def getLocationName(Place_id: int):
 ### Get Places
 @router.get("/", response_model=List[schemas.PlaceResponse])
 def getPlaces(user: int=Depends(oauth2.getCurrentUser), limit:int = 10, skip:int = 0, search:Optional[str] = ""):
-    cursor.execute("""SELECT * 
+    cursor.execute("""SELECT PLACE.*,
+                             LOCATION.Named
                       FROM PLACE
+                      LEFT JOIN PLACES_AT_LOCATION ON PLACE.Place_id = PLACES_AT_LOCATION.Place_id
+                      LEFT JOIN LOCATION ON PLACES_AT_LOCATION.Location_id = LOCATION.Location_id
                       WHERE Named LIKE %s
                       LIMIT %s OFFSET %s """, ('%' + search + '%', limit, skip))
     places = cursor.fetchall()
@@ -63,13 +66,18 @@ def getPlaces(user: int=Depends(oauth2.getCurrentUser), limit:int = 10, skip:int
         Place_id=place[0],
         Named=place[1],
         Created_at=place[2],
-        Location_name=getLocationName(place[0])
+        Location_name=place[3]
     ))
     return place_responses
 
 @router.get("/{id}", response_model=schemas.PlaceResponse)
 def getPlaces(id: int, user: int=Depends(oauth2.getCurrentUser)):
-    cursor.execute("""SELECT * FROM PLACE WHERE Place_id = %s""", (id,))
+    cursor.execute("""SELECT PLACE.*,
+                             LOCATION.Named
+                      FROM PLACE
+                      LEFT JOIN PLACES_AT_LOCATION ON PLACE.Place_id = PLACES_AT_LOCATION.Place_id
+                      LEFT JOIN LOCATION ON PLACES_AT_LOCATION.Location_id = LOCATION.Location_id
+                      WHERE Place_id = %s""", (id,))
     place = cursor.fetchone()
     if not place:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -78,7 +86,7 @@ def getPlaces(id: int, user: int=Depends(oauth2.getCurrentUser)):
         Place_id=place[0],
         Named=place[1],
         Created_at=place[2],
-        Location_name=getLocationName(place[0])
+        Location_name=place[3]
     )
 
 ### Add a Place
