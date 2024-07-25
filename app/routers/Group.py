@@ -153,3 +153,7 @@ def UpdateOwner(id: int, new_owner_id: schemas.UpdateGroupOwner, Current_user: i
                             detail=f"Group with id: {id} was not found")
 
     return {"Updated": True}
+
+### Delete group
+
+### Join Group
