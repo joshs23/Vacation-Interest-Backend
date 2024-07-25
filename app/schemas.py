@@ -39,6 +39,10 @@ class PlaceBase(BaseModel):
 
 class NewPlace(PlaceBase):
     pass
+    Location_name: str
+
+class UpdatePlaceName(PlaceBase):
+    pass
 
 class PlaceResponse(PlaceBase):
     Place_id: int
@@ -146,8 +150,9 @@ class FeatureBase(BaseModel):
     Named: str
     Description: str
 
-class NewFeature(FeatureBase):
-    pass
+class NewFeature(BaseModel):
+    Named: str
+    Description: str
     
 class FeatureResponse(FeatureBase):
     pass
