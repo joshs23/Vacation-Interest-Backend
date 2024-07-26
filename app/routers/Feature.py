@@ -45,12 +45,12 @@ def addFeatureToPlace(Feature_id: int, Place_id: int):
 ###############################################################################################################################
 
 ### Get Features
-@router.get("/", response_model=schemas.FeatureResponse)
+@router.get("/", response_model=List[schemas.FeatureResponse])
 def getFeatures(user: int = Depends(oauth2.getCurrentUser), limit:int = 10, skip:int = 0, search:Optional[str] = ""):
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
                              FEATURE.Description,
-                             USER.Named,
+                             `USER`.Username,
                              PLACE.Named,
                              LOCATION.Named
                       FROM FEATURE
@@ -80,7 +80,7 @@ def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser)):
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
                              FEATURE.Description,
-                             USER.Named,
+                             USER.Username,
                              PLACE.Named,
                              LOCATION.Named
                       FROM FEATURE
