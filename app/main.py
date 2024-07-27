@@ -4,10 +4,26 @@ from fastapi import Body, FastAPI
 from . import models
 from .database import engine
 from .routers import Group, Location, Place, User, Auth, Feature
+from fastapi.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "https://vacation-interest-api.com"
+
+]
+
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=origins, 
+    allow_credentials=True, 
+    allow_methods=["*"], 
+    allow_headers= ["*"],
+)
 
 app.include_router(Location.router)
 app.include_router(Place.router)
