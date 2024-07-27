@@ -22,7 +22,7 @@ router = APIRouter(
 @router.get("/", response_model=List[schemas.UserResponse])
 def getUsers(current_user: int=Depends(oauth2.getCurrentUser), search:Optional[str] = "", limit:int = 10, skip:int = 0):
     cursor.execute("""SELECT * FROM `USER` 
-                      WHERE Named LIKE %s
+                      WHERE Username LIKE %s
                       LIMIT %s OFFSET %s """, ('%' + search + '%', limit, skip))
     users = cursor.fetchall()
     user_responses = []
@@ -54,12 +54,12 @@ def getUser(id: int, current_user: int=Depends(oauth2.getCurrentUser)):
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
 def addUser(new_user: schemas.CreateUser):
     # Hash the password
-    Hashed_password = utils.hash(new_user.Password_hash)
-    new_user.Password_hash = Hashed_password
+    Hashed_password = utils.hash(new_user.Password)
+    new_user.Password = Hashed_password
 
     try:
         cursor.execute("""INSERT INTO `USER` (Username, Email, Password_hash)
-                    VALUES (%s, %s, %s)""", (new_user.Username, new_user.Email, new_user.Password_hash))
+                    VALUES (%s, %s, %s)""", (new_user.Username, new_user.Email, new_user.Password))
         # Commit the transaction to ensure the INSERT operation is persisted
         cnx.commit()
         
@@ -122,7 +122,7 @@ def changeEmail(user: schemas.UserEmail, current_user: int=Depends(oauth2.getCur
 
     return {"Updated": True}
 
-### Delete own account
+### Delete own account TODO: Says it fails? cant authorize.
 @router.delete("/", response_model=schemas.UserResponse)
 def removeUser(current_user: int=Depends(oauth2.getCurrentUser)):
     # Fetch the User details before deleting it to ensure it exists
