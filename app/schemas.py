@@ -39,7 +39,7 @@ class PlaceBase(BaseModel):
 
 class NewPlace(PlaceBase):
     pass
-    Location_name: str
+    Location_id: int
 
 class UpdatePlaceName(PlaceBase):
     pass
@@ -61,7 +61,7 @@ class PlaceResponse(PlaceBase):
 class CreateUser(BaseModel):
     Username: str
     Email: EmailStr
-    Password_hash: str
+    Password: str
 
 class UserBase(BaseModel):
     Username: str
@@ -153,6 +153,7 @@ class FeatureBase(BaseModel):
 class NewFeature(BaseModel):
     Named: str
     Description: str
+    Place_id: int
     
 class FeatureResponse(FeatureBase):
     pass

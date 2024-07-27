@@ -32,6 +32,7 @@ def addFeatureToPlace(Feature_id: int, Place_id: int):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="Feature already exists in Place")
         else:
+            print(err)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Internal server error occurred while adding Feature to Place")
 
@@ -50,9 +51,10 @@ def getFeatures(user: int = Depends(oauth2.getCurrentUser), limit:int = 10, skip
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
                              FEATURE.Description,
+                             FEATURE.Created_at,
                              `USER`.Username,
-                             PLACE.Named,
-                             LOCATION.Named
+                             PLACE.Named AS Place,
+                             LOCATION.Named AS Location
                       FROM FEATURE
                       LEFT JOIN `USER` ON FEATURE.Added_by = `USER`.User_id
                       LEFT JOIN FEATURES_AT_PLACE ON FEATURE.Feature_id = FEATURES_AT_PLACE.Feature_id
@@ -68,9 +70,10 @@ def getFeatures(user: int = Depends(oauth2.getCurrentUser), limit:int = 10, skip
         Feature_id=feature[0],
         Named=feature[1],
         Description=feature[2],
-        Added_by=feature[3],
-        Place=feature[4],
-        Location=feature[5]
+        Created_at=feature[3],
+        Added_by=feature[4],
+        Place=feature[5],
+        Location=feature[6]
     ))
     return feature_responses
 
@@ -80,6 +83,7 @@ def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser)):
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
                              FEATURE.Description,
+                             FEATURE.Created_at,
                              USER.Username,
                              PLACE.Named,
                              LOCATION.Named
@@ -89,23 +93,24 @@ def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser)):
                       LEFT JOIN PLACE ON FEATURES_AT_PLACE.Place_id = PLACE.Place_id
                       LEFT JOIN PLACES_AT_LOCATION ON PLACE.Place_id = PLACES_AT_LOCATION.Place_id
                       LEFT JOIN LOCATION ON PLACES_AT_LOCATION.Location_id = LOCATION.Location_id
-                      WHERE Feature_id = %s""", (id,))
+                      WHERE FEATURE.Feature_id = %s""", (id,))
     feature = cursor.fetchone()
     if not feature:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Feature with id: {id} was not found")
-    return schemas.FeatureResponsee(
+    return schemas.FeatureResponse(
         Feature_id=feature[0],
         Named=feature[1],
         Description=feature[2],
-        Added_by=feature[3],
-        Place=feature[4],
-        Location=feature[5]
+        Created_at=feature[3],
+        Added_by=feature[4],
+        Place=feature[5],
+        Location=feature[6]
     )
 
 ### Add a Feature
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def addFeature(new_feature: schemas.NewFeature, Place: int, current_user: int=Depends(oauth2.getCurrentUser)):
+def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2.getCurrentUser)):
     try:
         cursor.execute("""INSERT INTO FEATURE (Named, Description, Added_by)
                           VALUES (%s, %s, %s)""", (new_feature.Named, new_feature.Description, current_user.User_id))
@@ -114,7 +119,7 @@ def addFeature(new_feature: schemas.NewFeature, Place: int, current_user: int=De
         cursor.execute("SELECT * FROM FEATURE WHERE Named = %s", (new_feature.Named,))
         added_feature = cursor.fetchone()
         Feature_id = added_feature[0]
-        PlaceAndLocationName = addFeatureToPlace(Feature_id, Place)
+        PlaceAndLocationName = addFeatureToPlace(Feature_id, new_feature.Place_id)
         cnx.commit()
 
     except mysql.connector.Error as err:
@@ -126,11 +131,12 @@ def addFeature(new_feature: schemas.NewFeature, Place: int, current_user: int=De
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Internal server error occurred.")
 
-    return schemas.FeatureResponsee(
+    return schemas.FeatureResponse(
         Feature_id=added_feature[0],
         Named=added_feature[1],
         Description=added_feature[2],
         Added_by=current_user.Username,
+        Created_at=added_feature[4],
         Place=PlaceAndLocationName[0],
         Location=PlaceAndLocationName[1]
     )
