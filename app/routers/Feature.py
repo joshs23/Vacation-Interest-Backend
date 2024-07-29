@@ -140,3 +140,5 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
         Place=PlaceAndLocationName[0],
         Location=PlaceAndLocationName[1]
     )
+
+### TODO Update name, update description, delete feature
