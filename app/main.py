@@ -34,4 +34,4 @@ app.include_router(Feature.router)
 
 @app.get("/")
 def root():
-    return {"message": "Hello World pushing out to ubuntu"}
+    return {"message": "Hello World"}
