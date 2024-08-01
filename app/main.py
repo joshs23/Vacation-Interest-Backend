@@ -31,3 +31,7 @@ app.include_router(User.router)
 app.include_router(Auth.router)
 app.include_router(Group.router)
 app.include_router(Feature.router)
+
+@app.get("/")
+def root():
+    return {"message": "Hello World pushing out to ubuntu"}
