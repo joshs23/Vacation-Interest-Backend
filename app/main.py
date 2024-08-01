@@ -1,6 +1,6 @@
 # run server - uvicorn app.main:app --reload
 import logging
-from config import settings
+from .config import settings
 logging.basicConfig(level=logging.DEBUG)
 logging.debug(f"Database username: {settings.DB_USERNAME}")
 
