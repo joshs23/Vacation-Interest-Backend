@@ -1,10 +1,7 @@
 # run server - uvicorn app.main:app --reload
-import logging
+
+ 
 from .config import settings
-logging.basicConfig(level=logging.DEBUG)
-logging.debug(f"Database username: {settings.DB_USERNAME}")
-
-
 from fastapi import Body, FastAPI
 from . import models
 from .database import engine
@@ -40,4 +37,6 @@ app.include_router(Feature.router)
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return {"""Welcome to my Vacation Interest project!
+            
+            Visit vacation-interest-api.com/docs for the documentation page of this API."""}
