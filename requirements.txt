@@ -9,6 +9,7 @@ cryptography==42.0.7
 dnspython==2.6.1
 ecdsa==0.19.0
 email_validator==2.1.1
+gunicorn==23.0.0
 fastapi==0.110.0
 h11==0.14.0
 httpcore==1.0.4
