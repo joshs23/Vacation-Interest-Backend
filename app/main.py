@@ -37,6 +37,4 @@ app.include_router(Feature.router)
 
 @app.get("/")
 def root():
-    return {"""Welcome to my Vacation Interest project!
-            
-            Visit vacation-interest-api.com/docs for the documentation page of this API."""}
+    return {"""Welcome to my Vacation Interest project! Visit vacation-interest-api.com/docs for the documentation page of this API."""}
