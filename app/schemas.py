@@ -1,6 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 ####################################### TOKEN #############################################
 class Token(BaseModel):
@@ -25,8 +24,7 @@ class Location(LocationBase):
 class LocationResponse(LocationBase):
     Location_id: int
     Created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 ########################################### PLACE ##########################################
 # Place_id     INT UNSIGNED AUTO_INCREMENT NOT NULL,

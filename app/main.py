@@ -1,7 +1,6 @@
 # run server - uvicorn app.main:app --reload
 
  
-from .config import settings
 from fastapi import Body, FastAPI
 from . import models
 from .database import engine

@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-import mysql.connector
-from mysql.connector import errorcode
 from ..database import cursor, cnx
 from .. import schemas, utils, oauth2
 

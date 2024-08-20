@@ -6,7 +6,7 @@ from typing import List, Optional
 from ..database import cursor, cnx
 from .Location import getLocation
 from sqlalchemy.orm import Session
-from ..database import engine, get_db
+from ..database import get_db
 
 router = APIRouter(
     prefix="/places",

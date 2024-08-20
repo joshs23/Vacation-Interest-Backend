@@ -1,4 +1,4 @@
-from fastapi import Response, status, HTTPException, Depends, APIRouter
+from fastapi import status, HTTPException, Depends, APIRouter
 import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, oauth2
