@@ -12,7 +12,7 @@ from ..database import cursor, cnx
 #   Users[1] = Group_id                                                                                                       #                                                                                                #
 #   Users[2] = Created_at                                                                                                     #                                                          #
 ###############################################################################################################################
-def addUser(User_id: int, Group_id: int):
+def addUserToGroup(User_id: int, Group_id: int):
     try:
         cursor.execute("""INSERT INTO USERS_IN_GROUP (User_id, Group_id) 
                         VALUES (%s, %s)""", (User_id, Group_id))
@@ -113,7 +113,7 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
                           WHERE Group_name = %s""", (new_group.Group_name, ))
         added_group = cursor.fetchone()
         Group_id=added_group[0]
-        addUser(current_user.User_id, Group_id)
+        addUserToGroup(current_user.User_id, Group_id)
         cnx.commit()
     except mysql.connector.Error as err:
         cnx.rollback()
