@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from . import schemas
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from .database import cursor
+from .database import get_cursor
 from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
@@ -33,7 +33,8 @@ def verifyAccessToken(token: str, credentials_exception):
 #   user[1] = Username                                                                                                        #
 #   user[3] = Email                                                                                                           #
 
-def getCurrentUser(token: str = Depends(oauth2_scheme)):
+def getCurrentUser(token: str = Depends(oauth2_scheme), cursor_and_cnx = Depends(get_cursor)):
+    cursor, _ = cursor_and_cnx
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                           detail='Could not validate credentials',
                                           headers={"WWW-Authenticate": "bearer"})
