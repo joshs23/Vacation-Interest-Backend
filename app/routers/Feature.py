@@ -3,7 +3,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, oauth2
 from typing import List, Optional
-from ..database import cursor, cnx
+from ..database import get_cursor
 from . import Place
 
 router = APIRouter(
@@ -20,7 +20,7 @@ router = APIRouter(
 #   features[2] = Created_at                                                                                                     #
 ###############################################################################################################################
 
-def addFeatureToPlace(Feature_id: int, Place_id: int):
+def addFeatureToPlace(Feature_id: int, Place_id: int, cursor):
     try:
         cursor.execute("""INSERT INTO FEATURES_AT_PLACE (Feature_id, Place_id) 
                       VALUES (%s, %s)""", (Feature_id, Place_id))
@@ -47,7 +47,9 @@ def addFeatureToPlace(Feature_id: int, Place_id: int):
 
 ### Get Features
 @router.get("/", response_model=List[schemas.FeatureResponse])
-def getFeatures(user: int = Depends(oauth2.getCurrentUser), limit:int = 10, skip:int = 0, search:Optional[str] = ""):
+def getFeatures(user: int = Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor), 
+                limit:int = 10, skip:int = 0, search:Optional[str] = ""):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
                              FEATURE.Description,
@@ -79,7 +81,8 @@ def getFeatures(user: int = Depends(oauth2.getCurrentUser), limit:int = 10, skip
 
 ### get one feature by id
 @router.get("/{id}", response_model=schemas.FeatureResponse)
-def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser)):
+def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
                              FEATURE.Description,
@@ -110,7 +113,9 @@ def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser)):
 
 ### Add a Feature
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2.getCurrentUser)):
+def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2.getCurrentUser), 
+               cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""INSERT INTO FEATURE (Named, Description, Added_by)
                           VALUES (%s, %s, %s)""", (new_feature.Named, new_feature.Description, current_user.User_id))
@@ -119,7 +124,7 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
         cursor.execute("SELECT * FROM FEATURE WHERE Named = %s", (new_feature.Named,))
         added_feature = cursor.fetchone()
         Feature_id = added_feature[0]
-        PlaceAndLocationName = addFeatureToPlace(Feature_id, new_feature.Place_id)
+        PlaceAndLocationName = addFeatureToPlace(Feature_id, new_feature.Place_id, cursor=cursor)
         cnx.commit()
 
     except mysql.connector.Error as err:

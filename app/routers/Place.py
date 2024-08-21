@@ -3,7 +3,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, oauth2
 from typing import List, Optional
-from ..database import cursor, cnx
+from ..database import get_cursor
 from .Location import getLocation
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -22,7 +22,7 @@ router = APIRouter(
 #   place[2] = Created_at                                                                                                     #
 ###############################################################################################################################
 
-def addPlaceToLocation(Place_id: int, Location_id: int, user: int, db: Session):
+def addPlaceToLocation(Place_id: int, Location_id: int, user: int, db: Session, cursor):
     try:
         cursor.execute("""INSERT INTO PLACES_AT_LOCATION (Place_id, Location_id) 
                       VALUES (%s, %s)""", (Place_id, Location_id))
@@ -48,7 +48,9 @@ def addPlaceToLocation(Place_id: int, Location_id: int, user: int, db: Session):
 
 ### Get Places
 @router.get("/", response_model=List[schemas.PlaceResponse])
-def getPlaces(user: int=Depends(oauth2.getCurrentUser), limit:int = 10, skip:int = 0, search:Optional[str] = ""):
+def getPlaces(user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor), 
+              limit:int = 10, skip:int = 0, search:Optional[str] = ""):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT PLACE.Place_id,
                              PLACE.Named,
                              PLACE.Created_at,
@@ -70,7 +72,8 @@ def getPlaces(user: int=Depends(oauth2.getCurrentUser), limit:int = 10, skip:int
     return place_responses
 
 @router.get("/{id}", response_model=schemas.PlaceResponse)
-def getPlace(id: int, user: int=Depends(oauth2.getCurrentUser)):
+def getPlace(id: int, user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT PLACE.*,
                              LOCATION.Named
                       FROM PLACE
@@ -89,8 +92,10 @@ def getPlace(id: int, user: int=Depends(oauth2.getCurrentUser)):
     )
 
 ### Add a Place
-@router.post("/", status_code=status.HTTP_201_CREATED)                          ### vv This part becasue of ORM vv
-def addPlace(new_place: schemas.NewPlace, user: int=Depends(oauth2.getCurrentUser), db: Session = Depends(get_db)):
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def addPlace(new_place: schemas.NewPlace, user: int=Depends(oauth2.getCurrentUser), 
+             cursor_and_cnx=Depends(get_cursor), db: Session = Depends(get_db)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""INSERT INTO PLACE (Named)
                           VALUES (%s)""", (new_place.Named,))
@@ -99,7 +104,7 @@ def addPlace(new_place: schemas.NewPlace, user: int=Depends(oauth2.getCurrentUse
         cursor.execute("SELECT * FROM PLACE WHERE Named = %s", (new_place.Named,))
         added_place = cursor.fetchone()
         Place_id = added_place[0]
-        Location_name = addPlaceToLocation(Place_id, new_place.Location_id, user=user, db=db)
+        Location_name = addPlaceToLocation(Place_id, new_place.Location_id, user=user, db=db, cursor=cursor)
         cnx.commit()
 
     except mysql.connector.Error as err:
@@ -120,7 +125,8 @@ def addPlace(new_place: schemas.NewPlace, user: int=Depends(oauth2.getCurrentUse
 
 ### Delete a Place TODO: delete from PLACES_AT_LOCATION and FEATURES_AT_PLACE first
 @router.delete("/{id}")
-def removePlace(id: int, user: int=Depends(oauth2.getCurrentUser)):
+def removePlace(id: int, user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     # Fetch the place details before deleting it to ensure it exists
     cursor.execute("""SELECT * FROM PLACE WHERE Place_id = %s""", (id,))
     deleted_place = cursor.fetchone()
@@ -135,7 +141,9 @@ def removePlace(id: int, user: int=Depends(oauth2.getCurrentUser)):
 
 ### Update a Place
 @router.put("/{id}")
-def changePlaceName(id: int, place: schemas.UpdatePlaceName, user: int=Depends(oauth2.getCurrentUser)):
+def changePlaceName(id: int, place: schemas.UpdatePlaceName, user: int=Depends(oauth2.getCurrentUser), 
+                    cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""UPDATE PLACE SET Named = %s WHERE Place_id = %s""", (place.Named, id))
         cnx.commit()

@@ -3,7 +3,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, oauth2
 from typing import List, Optional
-from ..database import cursor, cnx
+from ..database import get_cursor
 
 ### Functions for users in group table
 ####################################################### USERS_IN_GROUP ########################################################
@@ -12,7 +12,7 @@ from ..database import cursor, cnx
 #   Users[1] = Group_id                                                                                                       #                                                                                                #
 #   Users[2] = Created_at                                                                                                     #                                                          #
 ###############################################################################################################################
-def addUserToGroup(User_id: int, Group_id: int):
+def addUserToGroup(User_id: int, Group_id: int, cursor):
     try:
         cursor.execute("""INSERT INTO USERS_IN_GROUP (User_id, Group_id) 
                         VALUES (%s, %s)""", (User_id, Group_id))
@@ -41,7 +41,9 @@ router = APIRouter(
 
 ### get all user groups
 @router.get("/", response_model=List[schemas.GroupResponse])
-def getGroups(current_user: int=Depends(oauth2.getCurrentUser), limit:int = 10, skip:int = 0, search:Optional[str] = ""):
+def getGroups(current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor), 
+              limit:int = 10, skip:int = 0, search:Optional[str] = ""):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT USER_GROUP.*,
                              USER.Username,
                              USER.Email,
@@ -70,7 +72,8 @@ def getGroups(current_user: int=Depends(oauth2.getCurrentUser), limit:int = 10, 
 
 ### Get a specific user group by group id
 @router.get("/{id}", response_model=schemas.GroupResponse)
-def getGroup(id: int, current_user: int=Depends(oauth2.getCurrentUser)):
+def getGroup(id: int, current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT USER_GROUP.*,
                              USER.Username,
                              USER.Email,
@@ -98,7 +101,9 @@ def getGroup(id: int, current_user: int=Depends(oauth2.getCurrentUser)):
 
 ### Create a user group
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.GroupResponse)
-def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.getCurrentUser)):
+def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.getCurrentUser), 
+                cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""INSERT INTO USER_GROUP (Group_name, Owner_id, Public_group)
                        values (%s, %s, %s)""", (new_group.Group_name, current_user.User_id, new_group.Public_group))
@@ -113,7 +118,7 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
                           WHERE Group_name = %s""", (new_group.Group_name, ))
         added_group = cursor.fetchone()
         Group_id=added_group[0]
-        addUserToGroup(current_user.User_id, Group_id)
+        addUserToGroup(current_user.User_id, Group_id, cursor=cursor)
         cnx.commit()
     except mysql.connector.Error as err:
         cnx.rollback()
@@ -139,7 +144,9 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
 
 ### Update Group Owner
 @router.put("/{id}")
-def UpdateOwner(id: int, new_owner_id: schemas.UpdateGroupOwner, Current_user: int = Depends(oauth2.getCurrentUser)):
+def UpdateOwner(id: int, new_owner_id: schemas.UpdateGroupOwner, Current_user: int = Depends(oauth2.getCurrentUser), 
+                cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""UPDATE USER_GROUP SET Owner_id = %s WHERE Group_id = %s""", (new_owner_id.Owner_id, id))
         cnx.commit

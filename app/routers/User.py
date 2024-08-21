@@ -3,7 +3,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, utils, oauth2
 from typing import List, Optional
-from ..database import cursor, cnx
+from ..database import get_cursor
 
 router = APIRouter(
     prefix="/users",
@@ -20,7 +20,9 @@ router = APIRouter(
 
 ### Get Users
 @router.get("/", response_model=List[schemas.UserResponse])
-def getUsers(current_user: int=Depends(oauth2.getCurrentUser), search:Optional[str] = "", limit:int = 10, skip:int = 0):
+def getUsers(current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor), 
+             search:Optional[str] = "", limit:int = 10, skip:int = 0):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT * FROM `USER` 
                       WHERE Username LIKE %s
                       LIMIT %s OFFSET %s """, ('%' + search + '%', limit, skip))
@@ -36,7 +38,8 @@ def getUsers(current_user: int=Depends(oauth2.getCurrentUser), search:Optional[s
     return user_responses
 
 @router.get("/{id}", response_model=schemas.UserResponse)
-def getUser(id: int, current_user: int=Depends(oauth2.getCurrentUser)):
+def getUser(id: int, current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT * FROM `USER` WHERE User_id = %s""", (id,))
     user = cursor.fetchone()
     if not user:
@@ -52,7 +55,8 @@ def getUser(id: int, current_user: int=Depends(oauth2.getCurrentUser)):
 
 ### Add a User
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
-def addUser(new_user: schemas.CreateUser):
+def addUser(new_user: schemas.CreateUser, cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     # Hash the password
     Hashed_password = utils.hash(new_user.Password)
     new_user.Password = Hashed_password
@@ -85,7 +89,9 @@ def addUser(new_user: schemas.CreateUser):
 
 ### Update a Username
 @router.put("/username")
-def changeUserName(user: schemas.Username, current_user: int=Depends(oauth2.getCurrentUser)):
+def changeUserName(user: schemas.Username, current_user: int=Depends(oauth2.getCurrentUser), 
+                   cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""UPDATE `USER` SET Username = %s WHERE User_id = %s""", (user.Username, current_user.User_id))
         cnx.commit()
@@ -105,7 +111,8 @@ def changeUserName(user: schemas.Username, current_user: int=Depends(oauth2.getC
 
 ### Update a Email
 @router.put("/email")
-def changeEmail(user: schemas.UserEmail, current_user: int=Depends(oauth2.getCurrentUser)):
+def changeEmail(user: schemas.UserEmail, current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     try:
         cursor.execute("""UPDATE `USER` SET Email = %s WHERE User_id = %s""", (user.Email, current_user.User_id))
         cnx.commit()
@@ -124,7 +131,8 @@ def changeEmail(user: schemas.UserEmail, current_user: int=Depends(oauth2.getCur
 
 ### Delete own account TODO: Says it fails? cant authorize.
 @router.delete("/", response_model=schemas.UserResponse)
-def removeUser(current_user: int=Depends(oauth2.getCurrentUser)):
+def removeUser(current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
     # Fetch the User details before deleting it to ensure it exists
     cursor.execute("""SELECT * FROM `USER` WHERE User_id = %s""", (current_user.User_id,))
     deleted_user = cursor.fetchone()
