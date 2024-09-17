@@ -14,10 +14,10 @@ router = APIRouter(
 ### Functions for FEATURES_AT_PLACE table
 ### i.e. adding Space Needle observation deck to Space Needle
 ###################################################### FEATURES_AT_PLACE ######################################################
-#   FEATURES_AT_PLACE uses SQL to query the db                                                                               #
-#   features[0] = Feature_id                                                                                                      #
-#   features[1] = Place_id                                                                                                   #
-#   features[2] = Created_at                                                                                                     #
+#   FEATURES_AT_PLACE uses SQL to query the db                                                                                #
+#   features[0] = Feature_id                                                                                                  #
+#   features[1] = Place_id                                                                                                    #
+#   features[2] = Created_at                                                                                                  #
 ###############################################################################################################################
 
 def addFeatureToPlace(Feature_id: int, Place_id: int, cursor):
