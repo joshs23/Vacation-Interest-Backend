@@ -171,7 +171,7 @@ def create_all():
             """
             CREATE TABLE REVIEW (
                 Review_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
-                Review INT NOT NULL,
+                Review_score INT NOT NULL,
                 User_comment TEXT,
                 Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (Review_id)
