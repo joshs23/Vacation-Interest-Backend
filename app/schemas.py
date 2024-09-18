@@ -171,11 +171,25 @@ class FeatureResponse(FeatureBase):
 
 # CREATE TABLE REVIEW (
 # 	Review_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
-# 	Review INT NOT NULL,
+# 	Review_score INT NOT NULL,
 # 	User_comment TEXT,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (Review_id)
 # );
+
+class ReviewBase(BaseModel):
+    Review_id: int
+    Review_score: int
+    User_comment: str
+    Created_at: datetime
+
+class ReviewResponse(ReviewBase):
+    pass
+    Feature_name: str
+    Username: str
+    Place_name: str
+    Location_name: str
+
 
 # CREATE TABLE REVIEWS_OF_FEATURE (
 # 	Review_id INT UNSIGNED NOT NULL,
