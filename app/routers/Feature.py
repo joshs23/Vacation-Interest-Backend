@@ -81,7 +81,7 @@ def getFeatures(user: int = Depends(oauth2.getCurrentUser), cursor_and_cnx=Depen
 
 ### get one feature by id
 @router.get("/{id}", response_model=schemas.FeatureResponse)
-def getFeatures(id: int, user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
+def getFeature(id: int, user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
     cursor, _ = cursor_and_cnx
     cursor.execute("""SELECT FEATURE.Feature_id,
                              FEATURE.Named,
