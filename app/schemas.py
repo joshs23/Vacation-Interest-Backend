@@ -115,8 +115,8 @@ class UpdateGroupName(BaseModel):
 # 	Group_id INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (User_id, Group_id),
-# 	FOREIGN KEY (User_id) REFERENCES USERS(User_id),
-# 	FOREIGN KEY (Group_id) REFERENCES USER_GROUP(Group_id)
+# 	FOREIGN KEY (User_id) REFERENCES USERS(User_id) ON DELETE CASCADE,
+# 	FOREIGN KEY (Group_id) REFERENCES USER_GROUP(Group_id) ON DELETE CASCADE
 # );
 
 class Users_In_GroupBase(BaseModel):
@@ -129,8 +129,8 @@ class Users_In_GroupBase(BaseModel):
 # 	Location_id INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (Place_id),
-# 	FOREIGN KEY (Place_id) REFERENCES PLACE(Place_id),
-# 	FOREIGN KEY (Location_id) REFERENCES LOCATION(Location_id)
+# 	FOREIGN KEY (Place_id) REFERENCES PLACE(Place_id) ON DELETE CASCADE,
+# 	FOREIGN KEY (Location_id) REFERENCES LOCATION(Location_id) ON DELETE CASCADE
 # );
 
 # CREATE TABLE FEATURE (
@@ -140,7 +140,7 @@ class Users_In_GroupBase(BaseModel):
 # 	Added_by INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (Feature_id),
-# 	FOREIGN KEY (Added_by) REFERENCES USERS(User_id)
+# 	FOREIGN KEY (Added_by) REFERENCES USERS(User_id) ON DELETE CASCADE
 # );
 
 class FeatureBase(BaseModel):
@@ -165,16 +165,18 @@ class FeatureResponse(FeatureBase):
 # 	Place_id INT UNSIGNED NOT NULL, 
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (Feature_id),
-# 	FOREIGN KEY (Feature_id) REFERENCES FEATURE(Feature_id),
-# 	FOREIGN KEY (Place_id) REFERENCES PLACE(Place_id)
+# 	FOREIGN KEY (Feature_id) REFERENCES FEATURE(Feature_id) ON DELETE CASCADE,
+# 	FOREIGN KEY (Place_id) REFERENCES PLACE(Place_id) ON DELETE CASCADE
 # );
 
 # CREATE TABLE REVIEW (
 # 	Review_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
 # 	Review_score INT NOT NULL,
 # 	User_comment TEXT,
+# 	User_id INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-# 	PRIMARY KEY (Review_id)
+# 	PRIMARY KEY (Review_id),
+# 	FOREIGN KEY (User_id) REFERENCES USERS(User_id) ON DELETE CASCADE
 # );
 
 class ReviewBase(BaseModel):
@@ -194,9 +196,7 @@ class ReviewResponse(ReviewBase):
 # CREATE TABLE REVIEWS_OF_FEATURE (
 # 	Review_id INT UNSIGNED NOT NULL,
 # 	Feature_id INT UNSIGNED NOT NULL, 
-# 	User_id INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 # 	PRIMARY KEY (Review_id),
-# 	FOREIGN KEY (Review_id) REFERENCES REVIEW(Review_id),
-# 	FOREIGN KEY (Feature_id) REFERENCES FEATURE(Feature_id),
-# 	FOREIGN KEY (User_id) REFERENCES USERS(User_id)
+# 	FOREIGN KEY (Review_id) REFERENCES REVIEW(Review_id) ON DELETE CASCADE,
+# 	FOREIGN KEY (Feature_id) REFERENCES FEATURE(Feature_id) ON DELETE CASCADE
