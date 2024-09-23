@@ -4,7 +4,7 @@
 from fastapi import Body, FastAPI
 from . import models
 from .database import engine
-from .routers import Group, Location, Place, User, Auth, Feature
+from .routers import Group, Location, Place, User, Auth, Feature, Review
 from fastapi.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
@@ -33,6 +33,7 @@ app.include_router(User.router)
 app.include_router(Auth.router)
 app.include_router(Group.router)
 app.include_router(Feature.router)
+app.include_router(Review.router)
 
 @app.get("/")
 def root():

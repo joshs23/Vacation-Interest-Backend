@@ -173,10 +173,8 @@ class FeatureResponse(FeatureBase):
 # 	Review_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
 # 	Review_score INT NOT NULL,
 # 	User_comment TEXT,
-# 	User_id INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-# 	PRIMARY KEY (Review_id),
-# 	FOREIGN KEY (User_id) REFERENCES USERS(User_id) ON DELETE CASCADE
+# 	PRIMARY KEY (Review_id)
 # );
 
 class ReviewBase(BaseModel):
@@ -192,11 +190,18 @@ class ReviewResponse(ReviewBase):
     Place_name: str
     Location_name: str
 
+class NewReview(BaseModel):
+    Review_score: int
+    User_comment: str
+    Feature_id: int
+
 
 # CREATE TABLE REVIEWS_OF_FEATURE (
 # 	Review_id INT UNSIGNED NOT NULL,
 # 	Feature_id INT UNSIGNED NOT NULL, 
+# 	User_id INT UNSIGNED NOT NULL,
 #   Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-# 	PRIMARY KEY (Review_id),
+# 	FOREIGN KEY (User_id) REFERENCES USERS(User_id) ON DELETE CASCADE
+# 	PRIMARY KEY (Feature_id, User_id),
 # 	FOREIGN KEY (Review_id) REFERENCES REVIEW(Review_id) ON DELETE CASCADE,
 # 	FOREIGN KEY (Feature_id) REFERENCES FEATURE(Feature_id) ON DELETE CASCADE
