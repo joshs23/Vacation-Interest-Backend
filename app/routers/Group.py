@@ -161,6 +161,10 @@ def UpdateOwner(id: int, new_owner_id: schemas.UpdateGroupOwner, Current_user: i
 
     return {"Updated": True}
 
+###TODO
+
 ### Delete group
 
 ### Join Group
+
+### Update Group Name
