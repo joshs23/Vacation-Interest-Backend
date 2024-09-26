@@ -20,11 +20,12 @@ router = APIRouter(
 #   features[2] = Created_at                                                                                                  #
 ###############################################################################################################################
 
-def addFeatureToPlace(Feature_id: int, Place_id: int, cursor):
+def addFeatureToPlace(Feature_id: int, Place_id: int, cursor_and_cnx):
+    cursor, _ = cursor_and_cnx
     try:
         cursor.execute("""INSERT INTO FEATURES_AT_PLACE (Feature_id, Place_id) 
                       VALUES (%s, %s)""", (Feature_id, Place_id))
-        place = Place.getPlace(id = Place_id)
+        place = Place.getPlace(id = Place_id, cursor_and_cnx=cursor_and_cnx)
         return [place.Named, place.Location_name]
 
     except mysql.connector.Error as err:
@@ -124,7 +125,7 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
         cursor.execute("SELECT * FROM FEATURE WHERE Named = %s", (new_feature.Named,))
         added_feature = cursor.fetchone()
         Feature_id = added_feature[0]
-        PlaceAndLocationName = addFeatureToPlace(Feature_id, new_feature.Place_id, cursor=cursor)
+        PlaceAndLocationName = addFeatureToPlace(Feature_id, new_feature.Place_id, cursor_and_cnx=cursor_and_cnx)
         cnx.commit()
 
     except mysql.connector.Error as err:
