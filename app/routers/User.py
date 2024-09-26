@@ -129,7 +129,7 @@ def changeEmail(user: schemas.UserEmail, current_user: int=Depends(oauth2.getCur
 
     return {"Updated": True}
 
-### Delete own account TODO: Says it fails? cant authorize.
+### Delete own account
 @router.delete("/", response_model=schemas.UserResponse)
 def removeUser(current_user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
