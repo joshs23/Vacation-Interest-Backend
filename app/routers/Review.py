@@ -4,7 +4,6 @@ from mysql.connector import errorcode
 from .. import schemas, oauth2
 from typing import List, Optional
 from ..database import get_cursor
-from . import Feature
 
 router = APIRouter(
     prefix="/reviews",
