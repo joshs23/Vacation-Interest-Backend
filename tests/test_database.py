@@ -155,7 +155,7 @@ def create_all():
                 Added_by INT UNSIGNED NOT NULL,
                 Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (Feature_id),
-                FOREIGN KEY (Added_by) REFERENCES USER(User_id)
+                FOREIGN KEY (Added_by) REFERENCES USER(User_id) ON DELETE CASCADE
             );
             """,
             """
@@ -186,7 +186,7 @@ def create_all():
                 PRIMARY KEY (Feature_id, User_id),
                 FOREIGN KEY (Review_id) REFERENCES REVIEW(Review_id) ON DELETE CASCADE,
                 FOREIGN KEY (Feature_id) REFERENCES FEATURE(Feature_id) ON DELETE CASCADE,
-                FOREIGN KEY (User_id) REFERENCES USER(User_id)
+                FOREIGN KEY (User_id) REFERENCES USER(User_id) ON DELETE CASCADE
             );
             """
         ]
