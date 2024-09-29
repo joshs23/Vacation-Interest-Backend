@@ -1,4 +1,4 @@
-from fastapi import status, HTTPException, Depends, APIRouter
+from fastapi import status, HTTPException, Depends, APIRouter, Response
 import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, oauth2
@@ -147,4 +147,22 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
         Location=PlaceAndLocationName[1]
     )
 
-### TODO Update name, update description, delete feature
+### TODO Update name
+
+### TODO update description
+
+### Delete a feature
+@router.delete("/{id}")
+def removeFeature(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
+    ###TODO make sure only owner can delete
+    cursor.execute("""SELECT * FROM FEATURE WHERE Feature_id = %s""", (id,))
+    deleted_feature = cursor.fetchone()
+
+    if deleted_feature is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Feature with id: {id} was not found")
+    cursor.execute("""DELETE FROM FEATURE WHERE Feature_id = %s""", (id,))
+    cnx.commit()
+
+    return Response(status_code= status.HTTP_204_NO_CONTENT)

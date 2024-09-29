@@ -177,3 +177,9 @@ def addReview(new_review: schemas.NewReview, current_user: int=Depends(oauth2.ge
         Place_name=review[6],
         Location_name=review[7]
     )
+
+### TODO Update Review score
+
+### TODO Update Review body
+
+### TODO Delete Review
