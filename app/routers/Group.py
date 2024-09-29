@@ -36,6 +36,7 @@ def checkOwner(group_id, current_user_id, cursor):
 ###############################################################################################################################
 def addUserToGroup(User_id: int, Group_id: int, cursor):
     try:
+        print("""INSERT INTO USERS_IN_GROUP (User_id, Group_id) VALUES (%s, %s)""", (User_id, Group_id))
         cursor.execute("""INSERT INTO USERS_IN_GROUP (User_id, Group_id) 
                         VALUES (%s, %s)""", (User_id, Group_id))
     except mysql.connector.Error as err:
@@ -44,6 +45,7 @@ def addUserToGroup(User_id: int, Group_id: int, cursor):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="User already in group")
         else:
+            print(err)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Internal server error occurred while adding user to group")
 
@@ -51,6 +53,14 @@ router = APIRouter(
     prefix="/group",
     tags=['Group']
 )
+
+### Join Group
+@router.post("/join{id}")
+def joinGroup(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
+    addUserToGroup(current_user.User_id, id, cursor)
+    cnx.commit()
+    return {"Updated": True}
 
 ######################################################### USER_GROUP ##########################################################
 #   USER_GROUP uses SQL to query the db                                                                                       #
@@ -166,12 +176,19 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
 
 ### Update Group Owner
 @router.put("/{id}")
-def updateOwner(id: int, new_owner_id: schemas.UpdateGroupOwner, current_user: int = Depends(oauth2.getCurrentUser), 
+def updateOwner(id: int, new_owner: schemas.UpdateGroup, current_user: int = Depends(oauth2.getCurrentUser), 
                 cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
+    if(not checkOwner(id, current_user.User_id, cursor)):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized action.")
     try:
-        cursor.execute("""UPDATE USER_GROUP SET Owner_id = %s WHERE Group_id = %s""", (new_owner_id.Owner_id, id))
-        cnx.commit
+        if(new_owner.Owner_id):
+            cursor.execute("""UPDATE USER_GROUP SET Owner_id = %s WHERE Group_id = %s""", (new_owner.Owner_id, id))
+            cnx.commit()
+        if(new_owner.Group_name):
+            cursor.execute("""UPDATE USER_GROUP SET Group_name = %s WHERE Group_id = %s""", (new_owner.Group_name, id))
+            cnx.commit()
     except mysql.connector.Error as err:
         cnx.rollback
         print(err)
@@ -202,7 +219,3 @@ def removeGroup(id: int, current_user: int = Depends(oauth2.getCurrentUser),curs
     cnx.commit()
 
     return Response(status_code= status.HTTP_204_NO_CONTENT)
-
-### TODO Join Group
-
-### TODO Update Group Name

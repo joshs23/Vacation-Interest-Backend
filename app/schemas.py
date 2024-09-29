@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr
+from typing import Optional
 
 ####################################### TOKEN #############################################
 class Token(BaseModel):
@@ -104,11 +105,9 @@ class NewGroup(BaseModel):
     Group_name: str
     Public_group: bool
 
-class  UpdateGroupOwner(BaseModel):
-    Owner_id: int
-    
-class UpdateGroupName(BaseModel):
-    Group_name: str
+class  UpdateGroup(BaseModel):
+    Owner_id: Optional[int] = None
+    Group_name: Optional[str] = None
 
 # CREATE TABLE USERS_IN_GROUP (
 # 	User_id INT UNSIGNED NOT NULL,
