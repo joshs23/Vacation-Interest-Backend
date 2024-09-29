@@ -123,7 +123,7 @@ def addPlace(new_place: schemas.NewPlace, user: int=Depends(oauth2.getCurrentUse
         Location_name = Location_name
     )
 
-### Delete a Place TODO: delete from PLACES_AT_LOCATION and FEATURES_AT_PLACE first
+### Delete a Place
 @router.delete("/{id}")
 def removePlace(id: int, user: int=Depends(oauth2.getCurrentUser), cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
