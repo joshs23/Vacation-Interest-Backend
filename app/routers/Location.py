@@ -77,7 +77,7 @@ def changeLocationName(id: int, updated_location: schemas.Location, db: Session 
     return {"Updated": True}
 
 ### Delete a location by id
-@router.delete("/{id}", status_code= status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}")
 def removeLocation(id: int, db: Session = Depends(get_db), user: int=Depends(oauth2.getCurrentUser)):
     location = db.query(models.Location).filter(models.Location.Location_id == id).first()
 
