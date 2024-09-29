@@ -147,9 +147,28 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
         Location=PlaceAndLocationName[1]
     )
 
-### TODO Update name
+### Update Feature
+@router.put("/{id}")
+def updateFeature(id: int, update: schemas.UpdateFeature, current_user: int = Depends(oauth2.getCurrentUser), 
+                cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
+    try:
+        if(update.Named):
+            cursor.execute("""UPDATE FEATURE SET Named = %s WHERE Feature_id = %s""", (update.Named, id))
+            cnx.commit()
+        if(update.Description):
+            cursor.execute("""UPDATE FEATURE SET Description = %s WHERE Feature_id = %s""", (update.Description, id))
+            cnx.commit()
+    except mysql.connector.Error as err:
+        cnx.rollback
+        print(err)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail="Internal server error occurred.")
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Feature with id: {id} was not found")
 
-### TODO update description
+    return {"Updated": True}
 
 ### Delete a feature
 @router.delete("/{id}")

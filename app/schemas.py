@@ -159,6 +159,10 @@ class FeatureResponse(FeatureBase):
     Place: str
     Location: str
 
+class UpdateFeature(BaseModel):
+    Named: Optional[str] = None
+    Description: Optional[str] = None
+
 # CREATE TABLE FEATURES_AT_PLACE(
 # 	Feature_id INT UNSIGNED NOT NULL,
 # 	Place_id INT UNSIGNED NOT NULL, 
