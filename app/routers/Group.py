@@ -174,20 +174,20 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
         )
     )
 
-### Update Group Owner
+### Update Group Owner - must be group owner
 @router.put("/{id}")
-def updateOwner(id: int, new_owner: schemas.UpdateGroup, current_user: int = Depends(oauth2.getCurrentUser), 
+def updateGroup(id: int, update: schemas.UpdateGroup, current_user: int = Depends(oauth2.getCurrentUser), 
                 cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
     if(not checkOwner(id, current_user.User_id, cursor)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
     try:
-        if(new_owner.Owner_id):
-            cursor.execute("""UPDATE USER_GROUP SET Owner_id = %s WHERE Group_id = %s""", (new_owner.Owner_id, id))
+        if(update.Owner_id):
+            cursor.execute("""UPDATE USER_GROUP SET Owner_id = %s WHERE Group_id = %s""", (update.Owner_id, id))
             cnx.commit()
-        if(new_owner.Group_name):
-            cursor.execute("""UPDATE USER_GROUP SET Group_name = %s WHERE Group_id = %s""", (new_owner.Group_name, id))
+        if(update.Group_name):
+            cursor.execute("""UPDATE USER_GROUP SET Group_name = %s WHERE Group_id = %s""", (update.Group_name, id))
             cnx.commit()
     except mysql.connector.Error as err:
         cnx.rollback
