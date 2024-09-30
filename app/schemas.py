@@ -198,6 +198,10 @@ class NewReview(BaseModel):
     User_comment: str
     Feature_id: int
 
+class UpdateReview(BaseModel):
+    Review_score: Optional[int] = None
+    User_comment: Optional[str] = None
+
 
 # CREATE TABLE REVIEWS_OF_FEATURE (
 # 	Review_id INT UNSIGNED NOT NULL,

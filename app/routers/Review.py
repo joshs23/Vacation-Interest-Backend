@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException, Depends, APIRouter
 import mysql.connector
 from mysql.connector import errorcode
-from .. import schemas, oauth2
+from .. import schemas, oauth2, utils
 from typing import List, Optional
 from ..database import get_cursor
 
@@ -178,8 +178,30 @@ def addReview(new_review: schemas.NewReview, current_user: int=Depends(oauth2.ge
         Location_name=review[7]
     )
 
-### TODO Update Review score
+### Update Review score or body - must be owner
+@router.put("/{id}")
+def updateReview(id: int, update: schemas.UpdateReview, current_user: int = Depends(oauth2.getCurrentUser), 
+                cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="REVIEW", owner_column="Review_id")):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized action.")
+    try:
+        if(update.Review_score):
+            cursor.execute("""UPDATE REVIEW SET Review_score = %s WHERE Review_id = %s""", (update.Review_score, id))
+            cnx.commit()
+        if(update.User_comment):
+            cursor.execute("""UPDATE REVIEW SET User_comment = %s WHERE Review_id = %s""", (update.User_comment, id))
+            cnx.commit()
+    except mysql.connector.Error as err:
+        cnx.rollback
+        print(err)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail="Internal server error occurred.")
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Review with id: {id} was not found")
 
-### TODO Update Review body
+    return {"Updated": True}
 
 ### TODO Delete Review
