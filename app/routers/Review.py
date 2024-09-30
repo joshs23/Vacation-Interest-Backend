@@ -1,4 +1,4 @@
-from fastapi import status, HTTPException, Depends, APIRouter
+from fastapi import Response, status, HTTPException, Depends, APIRouter
 import mysql.connector
 from mysql.connector import errorcode
 from .. import schemas, oauth2, utils
@@ -204,4 +204,20 @@ def updateReview(id: int, update: schemas.UpdateReview, current_user: int = Depe
 
     return {"Updated": True}
 
-### TODO Delete Review
+### Delete Review
+@router.delete("/{id}")
+def removeReview(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
+    cursor, cnx = cursor_and_cnx
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="REVIEW", owner_column="Review_id")):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized action.")
+    cursor.execute("""SELECT * FROM REVIEW WHERE Review_id = %s""", (id,))
+    deleted_review = cursor.fetchone()
+
+    if deleted_review is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Review with id: {id} was not found")
+    cursor.execute("""DELETE FROM REVIEW WHERE Review_id = %s""", (id,))
+    cnx.commit()
+
+    return Response(status_code= status.HTTP_204_NO_CONTENT)
