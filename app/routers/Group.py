@@ -178,7 +178,7 @@ def updateGroup(id: int, update: schemas.UpdateGroup, current_user: int = Depend
 
     return {"Updated": True}
 
-### Delete group
+### Delete group - must be group owner
 @router.delete("/{id}")
 def removeGroup(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
