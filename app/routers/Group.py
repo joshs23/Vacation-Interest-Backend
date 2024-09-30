@@ -1,31 +1,9 @@
 from fastapi import status, HTTPException, Depends, APIRouter, Response
 import mysql.connector
 from mysql.connector import errorcode
-from .. import schemas, oauth2
+from .. import schemas, oauth2, utils
 from typing import List, Optional
 from ..database import get_cursor
-
-### Helper function to check group owner for updates and deletes
-def checkOwner(group_id, current_user_id, cursor):
-    isOwner = False
-    try:
-        cursor.execute("""SELECT Owner_id
-                          FROM USER_GROUP
-                          WHERE Group_id = %s""", (group_id, ))
-        owner = cursor.fetchone()
-        if owner is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found.")
-        if(owner[0] == current_user_id):
-            isOwner = True
-
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_DUP_ENTRY:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"Group not found.")
-        else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                detail="Internal server error occurred.")
-    return isOwner
 
 ### Functions for users in group table
 ####################################################### USERS_IN_GROUP ########################################################
@@ -179,7 +157,7 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
 def updateGroup(id: int, update: schemas.UpdateGroup, current_user: int = Depends(oauth2.getCurrentUser), 
                 cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
-    if(not checkOwner(id, current_user.User_id, cursor)):
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="USER_GROUP")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
     try:
@@ -205,7 +183,7 @@ def updateGroup(id: int, update: schemas.UpdateGroup, current_user: int = Depend
 def removeGroup(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
     # must be owner of group to delete
-    if(not checkOwner(id, current_user.User_id, cursor)):
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="USER_GROUP")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
 
