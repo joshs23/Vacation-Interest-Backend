@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException, Depends, APIRouter, Response
 import mysql.connector
 from mysql.connector import errorcode
-from .. import schemas, oauth2
+from .. import schemas, oauth2, utils
 from typing import List, Optional
 from ..database import get_cursor
 from . import Place
@@ -152,6 +152,9 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
 def updateFeature(id: int, update: schemas.UpdateFeature, current_user: int = Depends(oauth2.getCurrentUser), 
                 cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="FEATURE")):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized action.")
     try:
         if(update.Named):
             cursor.execute("""UPDATE FEATURE SET Named = %s WHERE Feature_id = %s""", (update.Named, id))
@@ -174,7 +177,9 @@ def updateFeature(id: int, update: schemas.UpdateFeature, current_user: int = De
 @router.delete("/{id}")
 def removeFeature(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
-    ###TODO make sure only owner can delete
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="FEATURE")):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized action.")
     cursor.execute("""SELECT * FROM FEATURE WHERE Feature_id = %s""", (id,))
     deleted_feature = cursor.fetchone()
 
