@@ -152,7 +152,7 @@ def addFeature(new_feature: schemas.NewFeature, current_user: int=Depends(oauth2
 def updateFeature(id: int, update: schemas.UpdateFeature, current_user: int = Depends(oauth2.getCurrentUser), 
                 cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
-    if(not utils.checkOwner(id, current_user.User_id, cursor, table="FEATURE")):
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="FEATURE", owner_column="Feature_id")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
     try:
@@ -177,7 +177,7 @@ def updateFeature(id: int, update: schemas.UpdateFeature, current_user: int = De
 @router.delete("/{id}")
 def removeFeature(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
-    if(not utils.checkOwner(id, current_user.User_id, cursor, table="FEATURE")):
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="FEATURE", owner_column="Feature_id")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
     cursor.execute("""SELECT * FROM FEATURE WHERE Feature_id = %s""", (id,))

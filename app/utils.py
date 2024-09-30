@@ -12,12 +12,12 @@ def verify(plain_pwd: str, hashed_pwd: str):
     return pwd_context.verify(plain_pwd, hashed_pwd)
 
 ### Helper function to check group owner for updates and deletes
-def checkOwner(group_id, current_user_id, cursor, table):
+def checkOwner(group_id, current_user_id, cursor, table, owner_column):
     isOwner = False
     try:
         query = f"""SELECT Owner_id
                           FROM {table}
-                          WHERE Group_id = %s"""
+                          WHERE {owner_column} = %s"""
         cursor.execute(query, (group_id, ))
         owner = cursor.fetchone()
         if owner is None:

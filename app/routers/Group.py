@@ -157,7 +157,7 @@ def createGroup(new_group: schemas.NewGroup, current_user: int=Depends(oauth2.ge
 def updateGroup(id: int, update: schemas.UpdateGroup, current_user: int = Depends(oauth2.getCurrentUser), 
                 cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
-    if(not utils.checkOwner(id, current_user.User_id, cursor, table="USER_GROUP")):
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="USER_GROUP", owner_column="Group_id")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
     try:
@@ -183,7 +183,7 @@ def updateGroup(id: int, update: schemas.UpdateGroup, current_user: int = Depend
 def removeGroup(id: int, current_user: int = Depends(oauth2.getCurrentUser),cursor_and_cnx=Depends(get_cursor)):
     cursor, cnx = cursor_and_cnx
     # must be owner of group to delete
-    if(not utils.checkOwner(id, current_user.User_id, cursor, table="USER_GROUP")):
+    if(not utils.checkOwner(id, current_user.User_id, cursor, table="USER_GROUP", owner_column="Group_id")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized action.")
 
